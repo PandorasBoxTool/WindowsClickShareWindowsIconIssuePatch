@@ -2,8 +2,7 @@
 Windows ClickShare Windows Icon Issue Patch
 
 Please execute this shell file on the PC in Powershell 
-with 
-.\PatchFileThatWillWorking.ps1
+with .\PatchFileThatWillWorking.ps1
 
 The script fixes the following error pattern:
 Taskbar without function
