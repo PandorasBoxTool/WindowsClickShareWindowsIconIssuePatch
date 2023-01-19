@@ -15,5 +15,3 @@ The error comes from ClickShare because in the registry important keys are delet
 More information and origin of the main script can be found in the following link:
 
 https://www.barco.com/en/support/knowledge-base/6077-unresponsive-windows-taskbar-with-clickshare-app
-
-Translated with www.DeepL.com/Translator (free version)
