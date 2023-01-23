@@ -2,6 +2,42 @@
 Stop-Process -Name explorer
 
 
+
+Start-Process msiexec.exe -ArgumentList '/uninstall "C:\Program Files\Barco\ClickShare\ClickShare.msi" /quiet' -Wait
+Start-Process "C:\Program Files (x86)\Barco\ClickShare Native\unins000.exe" -ArgumentList '/SILENT' -Wait
+Remove-ItemProperty -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Barco\ClickShare" -Recurse -Force
+
+$programName = "calendarreader32.exe"
+$possiblePaths = "C:\", "D:\", "E:\"
+
+foreach ($path in $possiblePaths) {
+    $fullPath = Join-Path -Path $path -ChildPath $programName
+    if (Test-Path $fullPath) {
+        Remove-Item -Path $fullPath -Recurse -Force
+        Write-Host "Deleted $fullPath"
+        break
+    }
+}
+
+$key = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\calendarreader32'
+Remove-ItemProperty -Path $key -Recurse -Force
+
+$programName = "calendarreader64.exe"
+$possiblePaths = "C:\", "D:\", "E:\"
+
+foreach ($path in $possiblePaths) {
+    $fullPath = Join-Path -Path $path -ChildPath $programName
+    if (Test-Path $fullPath) {
+        Remove-Item -Path $fullPath -Recurse -Force
+        Write-Host "Deleted $fullPath"
+        break
+    }
+}
+
+$key = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\calendarreader64'
+Remove-ItemProperty -Path $key -Recurse -Force
+
+
 $objSID = New-Object System.Security.Principal.SecurityIdentifier ("S-1-15-2-1")
 $objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
 $user = $objUser.Value
