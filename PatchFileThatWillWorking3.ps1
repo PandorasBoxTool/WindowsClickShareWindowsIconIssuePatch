@@ -66,6 +66,8 @@ Set-Acl $folder $Acl
 }     
 }
 
+Get-AppXPackage -AllUsers | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+
 Get-AppXPackage *Microsoft.Windows.Search* |
 ForEach-Object {
 Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
