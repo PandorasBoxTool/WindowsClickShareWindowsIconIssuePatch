@@ -110,4 +110,4 @@ taskbar/explorer
 start/search/o365 auth/registration
 Write-Host "Script has finished running successfully. Made by Pandoras Box Tool ;-)"
 Start-Sleep -Seconds 10
-Restart-Computer
+#Restart-Computer
