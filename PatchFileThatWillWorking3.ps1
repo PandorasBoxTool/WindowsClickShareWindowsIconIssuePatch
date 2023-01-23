@@ -1,21 +1,6 @@
 #Kill explorer
 Stop-Process -Name explorer
 
-# Script to download and extract file from URL
-
-# Define URL and destination for the file
-$url = "https://www.barco.com/services/website/nl/KnowledgeBaseArticle/DownloadAttachment?articleNumber=6077&attachmentFileName=FixUserShellFolderPermissions.zip"
-$destination = "C:\Users\$env:username\Desktop\FixUserShellFolderPermissions.zip"
-
-# Download the file
-Invoke-WebRequest -Uri $url -OutFile $destination
-
-# Extract the file
-Expand-Archive -Path $destination -DestinationPath "C:\Users\$env:username\Desktop"
-
-# Confirm the file has been extracted and placed on the desktop
-Write-Host "File has been extracted and placed on the desktop."
-
 #Then we need to addet the Uninstaller
 Start-Process msiexec.exe -ArgumentList '/uninstall "C:\Program Files\Barco\ClickShare\ClickShare.msi" /quiet' -Wait
 Start-Process "C:\Program Files (x86)\Barco\ClickShare Native\unins000.exe" -ArgumentList '/SILENT' -Wait
@@ -48,23 +33,66 @@ foreach ($path in $possiblePaths) {
     }
 }
 
-$key = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\calendarreader64'
-Remove-ItemProperty -Path $key -Recurse -Force
+$objSID = New-Object System.Security.Principal.SecurityIdentifier ("S-1-15-2-1")
+$objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
+$user = $objUser.Value
+$Packages = $user.Split("\") 
+$packages = $packages[1]
 
-#  1) To fix permissions if needed, and then register required packages if permissions were modified:
-Push-Location "C:\Users\$env:username\Desktop"
-.\FixUserShellFolderPermissions.ps1
-Pop-Location
 
-#  2) To fix permissions if needed, and then always register only required or missing packages:
-Push-Location "C:\Users\$env:username\Desktop"
-.\FixUserShellFolderPermissions.ps1 -register
-Pop-Location
+$key = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-12-1-*'
+$profiles = (Get-Item $key)
 
-#  3) To fix permissions if needed, and then force registering every packages (might take long time):
-Push-Location "C:\Users\$env:username\Desktop"
-.\FixUserShellFolderPermissions.ps1 -force
-Pop-Location
+New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
+
+Foreach ($profile in $profiles) {
+$sids = $profile
+$sids = Split-path -path $sids -leaf
+$user = "HKU:\$sids\"
+$test = test-path $user
+
+if ($test -eq $true){ 
+$Folder = "HKU:\$sids\Software\Microsoft\windows\currentversion\explorer\"
+$Acl = Get-ACL $folder
+$AccessRule= New-Object System.Security.AccessControl.RegistryAccessRule($Packages,"Readkey","ContainerInherit","None","Allow")
+$Acl.SetAccessRule($AccessRule)
+Set-Acl $folder $Acl
+
+$Folder = "HKU:\$sids\Software\Microsoft\windows\currentversion\explorer\user shell folders"
+$Acl = Get-ACL $folder
+$AccessRule= New-Object System.Security.AccessControl.RegistryAccessRule($Packages,"Readkey","ContainerInherit","None","Allow")
+$Acl.SetAccessRule($AccessRule)
+Set-Acl $folder $Acl
+}     
+}
+
+Get-AppXPackage *Microsoft.Windows.Search* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+Get-AppXPackage *MicrosoftWindows.Client.CBS* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+Get-AppXPackage *Microsoft.Windows.ShellExperienceHost* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+Get-AppXPackage *Microsoft.AAD.BrokerPlugin* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+Get-AppXPackage *Microsoft.AccountsControl* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+
+Get-AppXPackage *Microsoft.Windows.CloudExperienceHost* |
+ForEach-Object {
+Add-AppxPackage -DisableDevelopmentMode -ForceApplicationShutdown -Register "$($_.InstallLocation)\AppXManifest.xml"
+}
+
+Get-AppXPackage -AllUsers | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 
 #Fix the Effectet Regedit
 Get-AppXPackage | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register "C:\Windows\SystemApps\Microsoft.Windows.Search_cw5n1h2txyewy\AppXManifest.xml"}
