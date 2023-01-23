@@ -74,7 +74,7 @@ if (-not (Get-AppxPackage Microsoft.AAD.BrokerPlugin)) { Add-AppxPackage -Regist
 if (-not (Get-AppxPackage Microsoft.Windows.CloudExperienceHost)) { Add-AppxPackage -Register "$env:windir\SystemApps\Microsoft.Windows.CloudExperienceHost_cw5n1h2txyewy\Appxmanifest.xml" -DisableDevelopmentMode -ForceApplicationShutdown } Get-AppxPackage Microsoft.Windows.CloudExperienceHost
 Start-Process explorer.exe
 
-Start-Process "ResetWindowsSearchBox.ps1"
+Start-Process "ResetWindowsSearchBox.ps1" 
 
 taskbar/explorer 
 start/search/o365 auth/registration
